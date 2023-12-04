@@ -26,8 +26,8 @@ if __name__ == '__main__':
     print('Loading arguments')
 
     parser = argparse.ArgumentParser(prog="Hyperparameter Tuning Script", description="Trains a CVAE model based on a hyperparameter combination and saves the performance to a file")
-    parser.add_argument('combo_averages', help="Path to .pickle for observed combination mean samples", type=str)
-    parser.add_argument('training_data', help="Path to .pickle for individual training samples", type=str)
+    parser.add_argument('combo_averages', help="Path to .pickle, .csv, or .tsv for observed combination mean samples", type=str)
+    parser.add_argument('training_data', help="Path to .pickle, .csv, or .tsv for individual training samples", type=str)
     parser.add_argument('t_start', help="Position of first one-hot-encoded tissue in the training data", type=int)
     parser.add_argument('t_end', help="Position of last one-hot-encoded tissue in the training data", type=int)
     parser.add_argument('s_start', help="Position of first one-hot-encoded species in the training data", type=int)
@@ -41,8 +41,18 @@ if __name__ == '__main__':
 
     print(args.val_seed)
 
-    combo_averages = pd.read_pickle(args.combo_averages)
-    training = pd.read_pickle(args.training_data)
+    if os.path.splitext(args.combo_averages)[1] == '.pickle':
+        combo_averages = pd.read_pickle(args.combo_averages)
+    elif os.path.splitext(args.combo_averages)[1] == '.csv':
+        combo_averages = pd.read_table(args.combo_averages, sep=',', index_col=0)
+    else:
+        combo_averages = pd.read_table(args.combo_averages, index_col=0)
+
+    if os.path.splitext(args.training_data)[1] == '.pickle':
+        training = pd.read_pickle(args.training_data)
+    elif os.path.splitext(args.training_data, sep=',', index_col=0)
+    else:
+        training = pd.read_table(args.training_data, index_col=0)
     training = training.dropna(axis=1)
     print('Training data dimensions: '+ str(training.shape))
 

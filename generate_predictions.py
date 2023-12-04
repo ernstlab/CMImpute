@@ -6,7 +6,7 @@ import cvae_general
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Impute Combination Mean Samples', description='Uses a trained decoder to impute species-tissue combination mean samples')
-    parser.add_argument('data', help='Path to .pickle with either testing or training data (used to one-hot-encoded label ordering and to extract combinations to be imputed if testing)', type=str)
+    parser.add_argument('data', help='Path to .pickle, .csv, or .tsv with either testing or training data (used to one-hot-encoded label ordering and to extract combinations to be imputed if testing)', type=str)
     parser.add_argument('t_start', help='Position of first one-hot-encoded tissue in the training data', type=int)
     parser.add_argument('t_end', help='Position of last one-hot-encoded tissue in the training data', type=int)
     parser.add_argument('s_start', help='Position of first one-hot-encoded species in the training data', type=int)
@@ -22,7 +22,12 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    data = pd.read_pickle(args.data)
+    if os.path.splitext(args.data)[1] == '.pickle':
+        data = pd.read_pickle(args.data)
+    elif os.path.splitext(args.data)[1] == '.csv':
+        data = pd.read_table(args.data, sep=',', index_col=0)
+    else:
+        data = pd.read_table(args.data, index_col=0)
     data = data.dropna(axis=1)
 
     decoder = keras.models.load_model(args.decoder)
