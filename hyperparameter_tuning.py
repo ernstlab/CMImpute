@@ -39,26 +39,28 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    print(args.val_seed)
-
     if os.path.splitext(args.combo_averages)[1] == '.pickle':
         combo_averages = pd.read_pickle(args.combo_averages)
-    elif os.path.splitext(args.combo_averages)[1] == '.csv':
-        combo_averages = pd.read_table(args.combo_averages, sep=',', index_col=0)
+    elif os.path.splitext(args.combo_averages)[1] == '.csv' or args.combo_averages.split('.', 1)[1] == 'csv.gz':
+        combo_averages = pd.read_table(args.combo_averages, sep=',', index_col=[0,1])
     else:
         combo_averages = pd.read_table(args.combo_averages, index_col=0)
+    print('Observed combination mean sample dimentions: ' + str(combo_averages.shape))
 
     if os.path.splitext(args.training_data)[1] == '.pickle':
         training = pd.read_pickle(args.training_data)
-    elif os.path.splitext(args.training_data, sep=',', index_col=0)
+    elif os.path.splitext(args.training_data)[1] == '.csv' or args.training_data.split('.', 1)[1] == 'csv.gz':
+        training = pd.read_table(args.training_data, sep=',', index_col=0)
     else:
         training = pd.read_table(args.training_data, index_col=0)
     training = training.dropna(axis=1)
     print('Training data dimensions: '+ str(training.shape))
 
+    index = args.index - 1
+
     if not os.path.isdir(args.output_dir):
         os.mkdir(args.output_dir)
-    if 'best' + str(args.index+1) + '.txt' in os.listdir(args.output_dir):
+    if 'best' + str(index+1) + '.txt' in os.listdir(args.output_dir):
         print('Hyperparameter combination already trained')
         exit()
 
@@ -78,14 +80,14 @@ if __name__ == '__main__':
     print(Xval.shape)
     print(yval.shape)
 
-    n = lists[args.index][0]
+    n = lists[index][0]
     layouts = [(1, [2**n]), (2, [2**n, 2**n]), (3, [2**n, 2**n, 2**n]), (2, [2**(n+1), 2**n]), (3, [2**(n+2), 2**(n+1), 2**n])]
 
-    layout = layouts[lists[args.index][1]]
-    activation_function = lists[args.index][2]
-    latent_space = lists[args.index][3]
-    learning_rate = lists[args.index][4]
-    epsilon = lists[args.index][5]
+    layout = layouts[lists[index][1]]
+    activation_function = lists[index][2]
+    latent_space = lists[index][3]
+    learning_rate = lists[index][4]
+    epsilon = lists[index][5]
 
     print(layout)
     print(activation_function)
@@ -103,6 +105,7 @@ if __name__ == '__main__':
 
     if not np.isnan(trained_cvae.history['loss'][-1]):
         predictions = helper.predict_group_mean_normal(val_data, tissue_index, args.t_start, args.t_end+1, species_index, args.s_start, args.s_end+1, args.d_start, decoder, latent_space)
+        
         result = helper.combo_mean_samplewise_performance_pearson(predictions, combo_averages)
         print(result)
 
@@ -110,11 +113,11 @@ if __name__ == '__main__':
             max_performance = result
             max_model = [layout, activation_function, latent_space, learning_rate, epsilon, rand_seed]
 
-    print(args.index+1)
+    print(index+1)
     print(max_model)
     print(max_performance)
 
-    output_file = open(args.output_dir + '/best' + str(args.index+1) + '.txt', 'w')
+    output_file = open(args.output_dir + '/best' + str(index+1) + '.txt', 'w')
     output_file.write(str(max_performance) + '\n')
     if max_model is not None:
         output_file.write(str(max_model[0][0]) + '\n')

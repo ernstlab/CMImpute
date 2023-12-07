@@ -3,6 +3,7 @@ import pandas as pd
 from tensorflow import keras
 import argparse
 import cvae_general
+import os
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Impute Combination Mean Samples', description='Uses a trained decoder to impute species-tissue combination mean samples')
@@ -24,7 +25,7 @@ if __name__ == '__main__':
 
     if os.path.splitext(args.data)[1] == '.pickle':
         data = pd.read_pickle(args.data)
-    elif os.path.splitext(args.data)[1] == '.csv':
+    elif os.path.splitext(args.data)[1] == '.csv' or args.data.split('.', 1)[1] == 'csv.gz':
         data = pd.read_table(args.data, sep=',', index_col=0)
     else:
         data = pd.read_table(args.data, index_col=0)
@@ -50,6 +51,11 @@ if __name__ == '__main__':
 
     print('Number of combinations imputed: '+ str(len(predictions)))
 
-    pd.DataFrame.from_dict(predictions).transpose().to_pickle(args.pred_save_loc)
+    if os.path.splitext(args.pred_save_loc)[1] == '.pickle':
+        pd.DataFrame.from_dict(predictions).transpose().to_pickle(args.pred_save_loc)
+    elif os.path.splitext(args.pred_save_loc)[1] == '.csv':
+        pd.DataFrame.from_dict(predictions).transpose().to_csv(args.pred_save_loc)
+    else:
+        pd.DataFrame.from_dict(predictions).transpose().to_csv(args.pred_save_loc, sep='\t')
 
 

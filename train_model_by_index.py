@@ -4,6 +4,7 @@ from tensorflow.keras.optimizers import Adam
 import itertools
 import helper
 import argparse
+import os
 
 if __name__ == '__main__':
     ns = [8, 9, 10, 11]
@@ -38,7 +39,7 @@ if __name__ == '__main__':
 
     if os.path.splitext(args.training_data)[1] == '.pickle':
         training = pd.read_pickle(args.training_data)
-    elif os.path.splitext(args.training_data)[1] == '.csv':
+    elif os.path.splitext(args.training_data)[1] == '.csv' or args.training_data.split('.', 1)[1] == 'csv.gz':
         training = pd.read_table(args.training_data, sep=',', index_col=0)
     else:
         training = pd.read_table(args.training_data, index_col=0)
