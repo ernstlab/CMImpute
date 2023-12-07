@@ -1,7 +1,7 @@
 # CMImpute
 <a href="https://www.biorxiv.org/content/10.1101/2023.11.26.568769v1">Cross-species and tissue imputation of species-level DNA methylation samples across mammalian species.</a>
 
-CMImpute (Cross-species Methylation Imputation) is a imputation method based on a Conditional Variational Autoencoder (CVAE) to impute methylation values for species-tissue combinations that have not previously been experimentally profiled. CMImpute takes as input individual methylation samples along with their corresponding species and tissue labels. CMImpute outs a species-tissue combination mean sample, or combination mean sample for short, that represents a species' average methylation values in a particular tissue type.
+CMImpute (Cross-species Methylation Imputation) is a imputation method based on a Conditional Variational Autoencoder (CVAE) to impute methylation values for species-tissue combinations that have not previously been experimentally profiled. CMImpute takes as input individual methylation samples along with their corresponding species and tissue labels. CMImpute outputs a species-tissue combination mean sample, or combination mean sample for short, that represents a species' average methylation values in a particular tissue type.
 
 <img src='method_overview_main_fig.png' width='512'>
 
@@ -26,7 +26,7 @@ The training data input should be formatted as such. Example training inputs can
 <img src='example_input.png'>
 
 ## Step 1: Select Hyperparameters
-Hyperparameters are selected by performing a grid search over different combinations of the following hyperparameters: number of hidden layers, hidden layer dimensions, activation function, learning rate, episilon, and latent space dimension. Refer to the manuscript for details on the hyperparameter values being tested. Use hyperparameter_tuning.py to train a model and record the performance for each hyperparamter combination.
+Hyperparameters are selected by performing a grid search over different combinations of the following hyperparameters: number of hidden layers, hidden layer dimensions, activation function, learning rate, episilon, and latent space dimension. Refer to the manuscript for details on the hyperparameter values being tested. Use hyperparameter_tuning.py to train a model and record the performance for each hyperparameter combination in a text file.
 
 The training data (training_data) contains individual methylation samples, with multiple potentially correponding to the same species-tissue combination. The observed combination mean samples (combo_averages) contain one sample per species-tissue combination representing the average methylation values. The example_data directory demonstrates the format. This data can be a .pickle, .csv, or .tsv file.
 ```
@@ -127,6 +127,53 @@ python3 train_model_by_params.py example_data/train.csv.gz 0 58 59 406 407 examp
 ```
 
 ## Step 3: Perform imputation
-Once trained models are saved, the final imputation of species-tissue combination mean samples can be performed.
+Once trained models are saved, the final imputation of species-tissue combination mean samples can be performed using the saved decoder. The combinations to be imputed can be inputted in one of three ways: a testing dataset, a single species and tissue combination via command line arguements, or a file with a list of combinations. The predictions are saved to a .pickle or .csv file inferred from the inputted output directory (pred_save_loc).
+```
+python3 generate_predictions.py -h
+usage: Impute Combination Mean Samples [-h] [--tissue TISSUE] [--species SPECIES]
+                                       [--input_file INPUT_FILE]
+                                       data t_start t_end s_start s_end d_start
+                                       latent_space_dimension decoder pred_save_loc
 
+Uses a trained decoder to impute species-tissue combination mean samples
+
+positional arguments:
+  data                  Path to .pickle, .csv, or .tsv with either testing or training data (used to
+                        one-hot-encoded label ordering and to extract combinations to be imputed if
+                        testing)
+  t_start               Position of first one-hot-encoded tissue in the training data
+  t_end                 Position of last one-hot-encoded tissue in the training data
+  s_start               Position of first one-hot-encoded species in the training data
+  s_end                 Position of last one-hot-encoded species in the training data
+  d_start               Position of first probe in the training data
+  latent_space_dimension
+                        Latent space dimension needed for input into the decoder
+  decoder               Path to .model file for the trained decoder
+  pred_save_loc         Path to output where predictions will be saved
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --tissue TISSUE       Tissue of single species-tissue combination to impute
+  --species SPECIES     Species of single species-tissue combination to impute
+  --input_file INPUT_FILE
+                        Tab-delimited file containing species-tissue combinations to impute
+```
+
+#### Testing dataset
+The species and tissue combinations are extractd from those present in a testing dataset. The testing dataset is assumed to be in the same format as the training dataset.
+```
+generate_predictions.py example_data/test.pickle 0 58 59 406 407 2 example_data/decoder_1_by_index.model/ example_data/preds_from_test_data.pickle
+```
+
+#### Command line arguments
+A single species and tissue combination is provided as command line arguments using the --species and --tissue flags.
+```
+python3 generate_predictions.py example_data/train.csv.gz 0 58 59 406 407 2 example_data/decoder_1_by_index.model/ example_data/preds_from_command_line_args.csv --species Mouse --tissue Liver
+```
+
+#### File with combinations
+The species and tissue combinations to be imputed are in a tab-delimited file (with tissues in the first column and species in the second). The file is provided as a command line argument using the --input_file flag.
+```
+generate_predictions.py example_data/train.pickle 0 58 59 406 407 2 example_data/decoder_1_by_params.model/ example_data/preds_from_input_file.csv --input_file example_data/combos_to_impute.txt
+```
 
