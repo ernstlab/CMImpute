@@ -18,7 +18,7 @@ Final imputed species-tissue combination mean samples for species and tissue com
 - tensorflow 2.10.0
 
 ## Data Format
-The training data input should be formatted as such. Example training inputs can be found in the example directory.
+The training data input should be formatted as such. Example training inputs can be found in the example directory. The data can be saved as a .pickle, .csv, or .tsv file with the extension infered from the file name.
 - First column containing row names
 - First row containing species and tissue names folowed by probe name
 - Data consisting of one-hot encoded species and tissue labels followed by methylation values
@@ -28,7 +28,7 @@ The training data input should be formatted as such. Example training inputs can
 ## Step 1: Select Hyperparameters
 Hyperparameters are selected by performing a grid search over different combinations of the following hyperparameters: number of hidden layers, hidden layer dimensions, activation function, learning rate, episilon, and latent space dimension. Refer to the manuscript for details on the hyperparameter values being tested. Use hyperparameter_tuning.py to train a model and record the performance for each hyperparameter combination in a text file.
 
-The training data (training_data) contains individual methylation samples, with multiple potentially correponding to the same species-tissue combination. The observed combination mean samples (combo_averages) contain one sample per species-tissue combination representing the average methylation values. The example_data directory demonstrates the format. This data can be a .pickle, .csv, or .tsv file.
+The training data (training_data) contains individual methylation samples, with multiple potentially correponding to the same species-tissue combination. The observed combination mean samples (combo_averages) contain one sample per species-tissue combination representing the average methylation values. The example_data directory demonstrates the format. This data can be a .pickle, .csv, or .tsv file. The validation seed is optional. If it is not provided, a seed that results in a valid train-validation split will be selected (see manuscript for details).
 ```
 python3 hyperparameter_tuning.py -h
 
@@ -59,7 +59,7 @@ python3 hyperparameter_tuning.py example_data/observed_combo_mean_samples.csv.gz
 ```
 
 ## Step 2: Train Model
-There are two ways to train the model: by index (same index determined during hyperparameter selection) or by manual entry of the desired hyperparameters.
+There are two ways to train the model: by index (same index determined during hyperparameter selection) or by manual entry of the desired hyperparameters. If using the hyperparamter grid search from step 1, the saved files are labelled by index and contain the hyperparameter combination and the random seed used to train that model. The validation seed and random seed are optional.
 
 ### Select hyperparameters via index
 ```
