@@ -177,7 +177,7 @@ The species and tissue combinations to be imputed are in a tab-delimited file (w
 generate_predictions.py example_data/train.pickle 0 58 59 406 407 2 example_data/decoder_1_by_params.model/ example_data/preds_from_input_file.csv --input_file example_data/combos_to_impute.txt
 ```
 
-#License
+# License
 
 All code is provided under the MIT Open Acess License Copyright 2025 Emily Maciejewski and Jason Ernst
 
