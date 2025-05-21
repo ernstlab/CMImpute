@@ -1,5 +1,5 @@
 # CMImpute
-<a href="[https://www.biorxiv.org/content/10.1101/2023.11.26.568769v1](https://genomebiology.biomedcentral.com/articles/10.1186/s13059-025-03561-2)">Cross-species and tissue imputation of species-level DNA methylation samples across mammalian species.</a>
+<a href="https://genomebiology.biomedcentral.com/articles/10.1186/s13059-025-03561-2">Cross-species and tissue imputation of species-level DNA methylation samples across mammalian species.</a>
 
 CMImpute (Cross-species Methylation Imputation) is a imputation method based on a Conditional Variational Autoencoder (CVAE) to impute methylation values for species-tissue combinations that have not previously been experimentally profiled. CMImpute takes as input individual methylation samples along with their corresponding species and tissue labels. CMImpute outputs a species-tissue combination mean sample, or combination mean sample for short, that represents a species' average methylation values in a particular tissue type.
 
